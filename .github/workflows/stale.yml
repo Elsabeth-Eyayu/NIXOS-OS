@@ -14,5 +14,5 @@ jobs:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           stale-issue-message: "This issue has been marked stale due to inactivity."
           close-issue-message: "Closing this issue as it has been inactive for too long."
-          days-before-stale: 1
-          days-before-close: 2
+          days-before-stale: 0
+          days-before-close: 1
