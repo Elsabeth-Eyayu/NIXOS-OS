@@ -3,6 +3,9 @@
 
   
   NIXOS installation and ftruncate() system call implementation
+  
+  Testing push events
 
-  Testing pull request eventS
+  Testing pull request events
+   Testing workflow automation
 
