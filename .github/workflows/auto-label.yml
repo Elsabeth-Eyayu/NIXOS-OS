@@ -1,18 +1,29 @@
-name: Auto‑label Issues
+name: Bulk Label Existing Issues
 
 on:
-  issues:
-    types: [opened, assigned]   # Trigger when an issue is created or assigned
+  workflow_dispatch:   # Manual trigger
 
 permissions:
-  issues: write   # Needed to modify issue labels
+  issues: write
 
 jobs:
-  add-label:
+  label-existing:
     runs-on: ubuntu-latest
     steps:
-      - name: Apply "in-progress" label
-        uses: actions-ecosystem/action-add-labels@v1
+      - name: Add "in-progress" label to all open issues
+        uses: actions/github-script@v7
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          labels: in-progress
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const issues = await github.paginate(
+              github.rest.issues.listForRepo,
+              { owner: context.repo.owner, repo: context.repo.repo, state: "open" }
+            );
+            for (const issue of issues) {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                labels: ["in-progress"]
+              });
+            }
