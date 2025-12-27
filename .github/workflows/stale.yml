@@ -16,4 +16,4 @@ jobs:
           close-issue-message: "Closing this issue as it has been inactive for too long."
           days-before-stale: 0
           days-before-close: 0
-          only-labels: stale-test
+          only-labels: stale-label
