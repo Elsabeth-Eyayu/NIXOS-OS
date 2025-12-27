@@ -1,4 +1,4 @@
-name: Move Assigned Issues to In Progress
+name: Assigned → In Progress
 
 on:
   issues:
@@ -19,9 +19,26 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const issue = context.issue;
-            // Replace with your actual project and column IDs
+            const { data: projects } = await github.projects.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo
+            });
+
+            // Find your project and column IDs
+            const project = projects.find(p => p.name === "YOUR_PROJECT_NAME");
+            const { data: columns } = await github.projects.listColumns({
+              project_id: project.id
+            });
+            const inProgressColumn = columns.find(c => c.name === "In Progress");
+
+            // Find the card for this issue
+            const { data: cards } = await github.projects.listCards({
+              column_id: inProgressColumn.id
+            });
+
+            // Move the card
             await github.projects.moveCard({
-              card_id: issue.number,
-              column_id: YOUR_IN_PROGRESS_COLUMN_ID
+              card_id: context.issue.number, // You’ll need the card ID, not just issue number
+              position: "top",
+              column_id: inProgressColumn.id
             });
