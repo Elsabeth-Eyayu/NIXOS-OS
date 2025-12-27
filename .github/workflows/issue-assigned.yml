@@ -1,0 +1,15 @@
+name: Move Assigned Issues to In Progress
+
+on:
+  issues:
+    types: [assigned]   # Trigger when an issue is assigned
+
+jobs:
+  add-in-progress-label:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Apply "in-progress" label
+        uses: actions-ecosystem/action-add-labels@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          labels: in-progress
