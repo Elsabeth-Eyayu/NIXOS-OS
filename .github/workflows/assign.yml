@@ -1,0 +1,64 @@
+name: Move issue to In Progress
+
+on:
+  issues:
+    types: [assigned]
+
+jobs:
+  update-project-status:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Update project status
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const issueNumber = context.payload.issue.number;
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+
+            // Step 1: Look up project item ID for this issue
+            const query = `
+              query($owner:String!, $repo:String!, $issue:Int!) {
+                repository(owner:$owner, name:$repo) {
+                  issue(number:$issue) {
+                    projectItems(first:10) {
+                      nodes {
+                        id
+                        project {
+                          title
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            `;
+            const result = await github.graphql(query, {
+              owner,
+              repo,
+              issue: issueNumber
+            });
+
+            const itemId = result.repository.issue.projectItems.nodes[0].id;
+
+            // Step 2: Update the Status field to "In progress"
+            const projectId = "YOUR_PROJECT_ID"; // from GraphQL
+            const statusFieldId = "YOUR_STATUS_FIELD_ID"; // from GraphQL
+            const inProgressOptionId = "YOUR_IN_PROGRESS_OPTION_ID"; // from GraphQL
+
+            const mutation = `
+              mutation {
+                updateProjectV2ItemFieldValue(
+                  input: {
+                    projectId: "${projectId}"
+                    itemId: "${itemId}"
+                    fieldId: "${statusFieldId}"
+                    value: { singleSelectOptionId: "${inProgressOptionId}" }
+                  }
+                ) {
+                  projectV2Item { id }
+                }
+              }
+            `;
+            await github.graphql(mutation);
