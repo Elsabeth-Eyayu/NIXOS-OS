@@ -1,7 +1,8 @@
 name: Bulk Label Existing Issues
 
 on:
-  workflow_dispatch:   # Manual trigger
+  issues:
+    types: [assigned]   # Runs automatically when an issue is assigned
 
 permissions:
   issues: write
@@ -10,20 +11,15 @@ jobs:
   label-existing:
     runs-on: ubuntu-latest
     steps:
-      - name: Add "in-progress" label to all open issues
+      - name: Add "in-progress" label when assigned
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const issues = await github.paginate(
-              github.rest.issues.listForRepo,
-              { owner: context.repo.owner, repo: context.repo.repo, state: "open" }
-            );
-            for (const issue of issues) {
-              await github.rest.issues.addLabels({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: issue.number,
-                labels: ["in-progress"]
-              });
-            }
+            const issueNumber = context.issue.number;
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issueNumber,
+              labels: ["in-progress"]
+            });
